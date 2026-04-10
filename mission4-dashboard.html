@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Root Labs — Ambassador Funnel Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F1B2D;
+    --navy-light: #1A2B42;
+    --navy-mid: #243650;
+    --green: #2D6A4F;
+    --green-light: #40916C;
+    --amber: #F4A261;
+    --amber-bg: rgba(244, 162, 97, 0.12);
+    --red: #E63946;
+    --red-bg: rgba(230, 57, 70, 0.12);
+    --green-bg: rgba(45, 106, 79, 0.12);
+    --white: #FFFFFF;
+    --gray-100: #F0F2F5;
+    --gray-200: #D9DCE1;
+    --gray-300: #A0A8B4;
+    --gray-400: #6B7280;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--gray-100);
+    color: var(--navy);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--navy);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-left h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.3px;
+  }
+  .header-left p {
+    font-size: 13px;
+    color: var(--gray-300);
+    margin-top: 4px;
+  }
+  .header-badge {
+    background: var(--green);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Container ── */
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  /* ── Week Tabs ── */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    background: var(--white);
+    border-radius: 10px;
+    padding: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .tab {
+    flex: 1;
+    padding: 11px 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-400);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+  }
+  .tab:hover { background: var(--gray-100); color: var(--navy); }
+  .tab.active {
+    background: var(--navy);
+    color: var(--white);
+  }
+
+  /* ── KPI Cards ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 22px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .kpi-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--gray-300);
+    margin-top: 6px;
+  }
+  .kpi-sub.up { color: var(--green); }
+  .kpi-sub.down { color: var(--red); }
+
+  /* ── Two-column layout ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  /* ── Visual Funnel ── */
+  .panel {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .panel-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--navy);
+  }
+
+  .funnel-stage {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 12px;
+  }
+  .funnel-label {
+    width: 110px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-400);
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .funnel-bar-wrap {
+    flex: 1;
+    height: 32px;
+    background: var(--gray-100);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .funnel-bar {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    transition: width 0.6s ease;
+    min-width: 36px;
+  }
+  .funnel-conv {
+    width: 54px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .funnel-arrow {
+    text-align: center;
+    margin: -4px 0 -4px 122px;
+    color: var(--gray-200);
+    font-size: 11px;
+  }
+
+  /* ── Stage Table ── */
+  .stage-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .stage-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 0 8px 12px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .stage-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+  }
+  .stage-table tr:last-child td { border-bottom: none; }
+  .status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .status-critical { background: var(--red-bg); color: var(--red); }
+  .status-at-risk { background: var(--amber-bg); color: #C77A2E; }
+  .status-on-track { background: var(--green-bg); color: var(--green); }
+
+  /* ── Callout Box ── */
+  .callout {
+    border-left: 4px solid var(--amber);
+    background: var(--amber-bg);
+    border-radius: 0 10px 10px 0;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .callout-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .callout-icon {
+    width: 22px;
+    height: 22px;
+    background: var(--amber);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .callout-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #8B5E2B;
+  }
+  .callout-body {
+    font-size: 13px;
+    color: #6B4A1F;
+    line-height: 1.6;
+  }
+  .callout-body strong { color: #5A3D15; }
+
+  /* ── Progress Bar ── */
+  .progress-panel {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
+  }
+  .progress-header h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .progress-count {
+    font-family: 'Sora', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--green);
+  }
+  .progress-count span {
+    font-size: 14px;
+    color: var(--gray-300);
+    font-weight: 500;
+  }
+  .progress-track {
+    height: 28px;
+    background: var(--gray-100);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--green-light));
+    border-radius: 14px;
+    transition: width 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+  }
+  .progress-markers {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--gray-300);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .header { padding: 20px; }
+    .container { padding: 20px 16px 48px; }
+    .funnel-label { width: 80px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Ambassador Funnel Dashboard</h1>
+    <p>Root Labs &mdash; Weekly Ops Tracker &mdash; Target: 10 Signed, Posting Ambassadors</p>
+  </div>
+  <div class="header-badge">LIVE TRACKER</div>
+</div>
+
+<div class="container">
+
+  <!-- Week Tabs -->
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchWeek(0)">Week 1</button>
+    <button class="tab" onclick="switchWeek(1)">Week 2</button>
+    <button class="tab" onclick="switchWeek(2)">Week 3</button>
+    <button class="tab" onclick="switchWeek(3)">Week 4</button>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Outreach Sent</div>
+      <div class="kpi-value" id="kpi-outreach">500</div>
+      <div class="kpi-sub" id="kpi-outreach-sub">cumulative this week</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Reply Rate</div>
+      <div class="kpi-value" id="kpi-reply">5.0%</div>
+      <div class="kpi-sub" id="kpi-reply-sub">up from 1.5% baseline</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Agreements Signed</div>
+      <div class="kpi-value" id="kpi-signed">4</div>
+      <div class="kpi-sub" id="kpi-signed-sub">cumulative</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Posts Live</div>
+      <div class="kpi-value" id="kpi-posts">1</div>
+      <div class="kpi-sub" id="kpi-posts-sub">of 10 target</div>
+    </div>
+  </div>
+
+  <!-- Funnel + Stage Table -->
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">Funnel — This Week</div>
+      <div id="funnel-visual">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Stage Breakdown</div>
+      <table class="stage-table">
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>Count</th>
+            <th>Conv.</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="stage-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Fragile Stage Callout -->
+  <div class="callout">
+    <div class="callout-header">
+      <div class="callout-icon">!</div>
+      <div class="callout-title">Fragile Stage: Agreement Signed &rarr; First Post Live</div>
+    </div>
+    <div class="callout-body">
+      <strong>The problem:</strong> Root Labs ships free product the moment an ambassador signs — then hopes they post. 56 of 60 ambassadors took the product and never posted. That's not an ambassador program, it's a gifting program with no accountability.<br><br>
+      <strong>The fix:</strong> Flip the product trigger. No product ships until the ambassador submits a content draft for review. The agreement includes a 7-day posting deadline. Product ships same-day once the draft is approved. This changes the sequence from "product first, post optional" to "commitment first, product second." Expected impact: activation rate from 6.7% to 70%+.
+    </div>
+  </div>
+
+  <!-- Cumulative Progress Bar -->
+  <div class="progress-panel">
+    <div class="progress-header">
+      <h3>Cumulative Progress — Signed &amp; Posting Ambassadors</h3>
+      <div class="progress-count" id="progress-num">1 <span>/ 10</span></div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width: 10%"></div>
+    </div>
+    <div class="progress-markers">
+      <span>0</span>
+      <span>Week 1</span>
+      <span>Week 2</span>
+      <span>Week 3</span>
+      <span>Week 4</span>
+      <span>10</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const weeks = [
+  {
+    label: "Week 1",
+    outreach: 500, outreachCum: 500,
+    replies: 25, replyRate: "5.0%",
+    calls: 13, callConv: "50%",
+    signed: 4, signedConv: "30%",
+    posts: 1, postConv: "25%",
+    signedCum: 4, postsCum: 1,
+    replySub: "up from 1.5% baseline",
+    signedSub: "4 cumulative",
+    postsSub: "1 of 10 target",
+    outreachSub: "500 cumulative",
+    statuses: ["on-track", "at-risk", "at-risk", "critical", "critical"],
+    statusLabels: ["ON TRACK", "AT RISK", "AT RISK", "CRITICAL", "CRITICAL"]
+  },
+  {
+    label: "Week 2",
+    outreach: 500, outreachCum: 1000,
+    replies: 28, replyRate: "5.5%",
+    calls: 14, callConv: "50%",
+    signed: 4, signedConv: "31%",
+    posts: 3, postConv: "70%",
+    signedCum: 8, postsCum: 4,
+    replySub: "improving with iteration",
+    signedSub: "8 cumulative",
+    postsSub: "4 of 10 target",
+    outreachSub: "1,000 cumulative",
+    statuses: ["on-track", "on-track", "at-risk", "at-risk", "at-risk"],
+    statusLabels: ["ON TRACK", "ON TRACK", "AT RISK", "AT RISK", "AT RISK"]
+  },
+  {
+    label: "Week 3",
+    outreach: 500, outreachCum: 1500,
+    replies: 30, replyRate: "6.0%",
+    calls: 15, callConv: "50%",
+    signed: 5, signedConv: "33%",
+    posts: 3, postConv: "70%",
+    signedCum: 13, postsCum: 7,
+    replySub: "personalization compounding",
+    signedSub: "13 cumulative",
+    postsSub: "7 of 10 target",
+    outreachSub: "1,500 cumulative",
+    statuses: ["on-track", "on-track", "on-track", "at-risk", "on-track"],
+    statusLabels: ["ON TRACK", "ON TRACK", "ON TRACK", "AT RISK", "ON TRACK"]
+  },
+  {
+    label: "Week 4",
+    outreach: 500, outreachCum: 2000,
+    replies: 30, replyRate: "6.0%",
+    calls: 15, callConv: "50%",
+    signed: 5, signedConv: "33%",
+    posts: 3, postConv: "70%",
+    signedCum: 18, postsCum: 10,
+    replySub: "steady state reached",
+    signedSub: "18 cumulative",
+    postsSub: "10 of 10 — TARGET HIT",
+    outreachSub: "2,000 cumulative",
+    statuses: ["on-track", "on-track", "on-track", "on-track", "on-track"],
+    statusLabels: ["ON TRACK", "ON TRACK", "ON TRACK", "ON TRACK", "ON TRACK"]
+  }
+];
+
+const stageNames = ["Outreach Sent", "Reply Received", "Call / Negotiation", "Agreement Signed", "First Post Live"];
+const barColors = ["#2D6A4F", "#40916C", "#F4A261", "#E6853E", "#E63946"];
+
+function switchWeek(idx) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+
+  const w = weeks[idx];
+
+  // KPI cards
+  document.getElementById('kpi-outreach').textContent = w.outreachCum.toLocaleString();
+  document.getElementById('kpi-outreach-sub').textContent = w.outreachSub;
+  document.getElementById('kpi-reply').textContent = w.replyRate;
+  document.getElementById('kpi-reply-sub').textContent = w.replySub;
+  document.getElementById('kpi-reply-sub').className = 'kpi-sub up';
+  document.getElementById('kpi-signed').textContent = w.signedCum;
+  document.getElementById('kpi-signed-sub').textContent = w.signedSub;
+  document.getElementById('kpi-posts').textContent = w.postsCum;
+  document.getElementById('kpi-posts-sub').textContent = w.postsSub;
+  document.getElementById('kpi-posts-sub').className = w.postsCum >= 10 ? 'kpi-sub up' : 'kpi-sub';
+
+  // Funnel visual
+  const counts = [w.outreach, w.replies, w.calls, w.signed, w.posts];
+  const convs = ["—", w.replyRate, w.callConv, w.signedConv, w.postConv];
+  const maxCount = counts[0];
+  let html = '';
+  for (let i = 0; i < 5; i++) {
+    const pct = Math.max((counts[i] / maxCount) * 100, 7);
+    html += `
+      <div class="funnel-stage">
+        <div class="funnel-label">${stageNames[i]}</div>
+        <div class="funnel-bar-wrap">
+          <div class="funnel-bar" style="width:${pct}%; background:${barColors[i]}">${counts[i]}</div>
+        </div>
+        <div class="funnel-conv">${convs[i]}</div>
+      </div>`;
+    if (i < 4) {
+      html += `<div class="funnel-arrow">&#9660;</div>`;
+    }
+  }
+  document.getElementById('funnel-visual').innerHTML = html;
+
+  // Stage table
+  const dropoffs = [0, w.outreach - w.replies, w.replies - w.calls, w.calls - w.signed, w.signed - w.posts];
+  let tbody = '';
+  for (let i = 0; i < 5; i++) {
+    tbody += `
+      <tr>
+        <td style="font-weight:500">${stageNames[i]}</td>
+        <td>${counts[i]}</td>
+        <td>${convs[i]}</td>
+        <td><span class="status-badge status-${w.statuses[i]}">${w.statusLabels[i]}</span></td>
+      </tr>`;
+  }
+  document.getElementById('stage-tbody').innerHTML = tbody;
+
+  // Progress bar
+  const progressPct = Math.min((w.postsCum / 10) * 100, 100);
+  document.getElementById('progress-fill').style.width = progressPct + '%';
+  document.getElementById('progress-num').innerHTML = `${w.postsCum} <span>/ 10</span>`;
+}
+
+// Initialize
+switchWeek(0);
+</script>
+
+</body>
+</html>

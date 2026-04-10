@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Root Labs — Ambassador Health Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B1220;
+    --surface: #0F1B2D;
+    --navy: #0F1B2D;
+    --navy-light: #1A2B42;
+    --green: #2D6A4F;
+    --green-light: #40916C;
+    --green-bright: #34D399;
+    --amber: #F4A261;
+    --amber-dim: rgba(244, 162, 97, 0.15);
+    --red: #E63946;
+    --red-dim: rgba(230, 57, 70, 0.12);
+    --green-dim: rgba(45, 106, 79, 0.15);
+    --text: #F1F5F9;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .header-text p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .live-clock {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .live-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background: var(--green-bright);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(52, 211, 153, 0); }
+  }
+  .btn-export {
+    background: var(--navy-light);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-export:hover { background: #243650; border-color: rgba(255,255,255,0.15); }
+  .btn-export svg { width: 14px; height: 14px; }
+
+  /* ── Container ── */
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 24px 60px;
+  }
+
+  /* ── KPI Cards ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.amber::before { background: var(--amber); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-card.neutral::before { background: var(--text-dim); }
+  .kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .kpi-icon.green { background: var(--green-dim); color: var(--green-light); }
+  .kpi-icon.amber { background: var(--amber-dim); color: var(--amber); }
+  .kpi-icon.red { background: var(--red-dim); color: var(--red); }
+  .kpi-icon.neutral { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+  .kpi-icon svg { width: 18px; height: 18px; }
+  .kpi-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kpi-value.green { color: var(--green-light); }
+  .kpi-value.amber { color: var(--amber); }
+  .kpi-value.red { color: var(--red); }
+
+  /* ── Filter Bar ── */
+  .controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-group {
+    display: flex;
+    gap: 6px;
+  }
+  .filter-btn {
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .filter-btn.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--text);
+  }
+  .filter-btn.active-amber {
+    background: rgba(244,162,97,0.2);
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+  .filter-btn.active-red {
+    background: rgba(230,57,70,0.2);
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .week-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+  }
+  .week-tab {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .week-tab:hover { color: var(--text); }
+  .week-tab.active {
+    background: var(--navy-light);
+    color: var(--text);
+  }
+
+  /* ── Table ── */
+  .table-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .table-scroll {
+    overflow-x: auto;
+  }
+  .amb-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 900px;
+  }
+  .amb-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: color 0.15s;
+  }
+  .amb-table th:hover { color: var(--text-muted); }
+  .amb-table th .sort-arrow {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 10px;
+    opacity: 0.4;
+  }
+  .amb-table th.sorted .sort-arrow { opacity: 1; color: var(--green-light); }
+  .amb-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .amb-table tbody tr {
+    transition: background 0.15s;
+  }
+  .amb-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+  .amb-table tbody tr:last-child td { border-bottom: none; }
+
+  /* Ambassador cell */
+  .amb-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  .amb-handle {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* Status chips */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .chip-green { background: var(--green-dim); color: var(--green-light); }
+  .chip-amber { background: var(--amber-dim); color: var(--amber); }
+  .chip-red { background: var(--red-dim); color: var(--red); }
+
+  .badge-yes {
+    color: var(--green-light);
+    font-weight: 600;
+  }
+  .badge-no {
+    background: var(--red-dim);
+    color: var(--red);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  /* Health Score chip */
+  .health-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    cursor: default;
+    position: relative;
+  }
+  .health-chip .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .health-chip.green { background: var(--green-dim); color: var(--green-light); }
+  .health-chip.green .dot { background: var(--green-light); }
+  .health-chip.amber { background: var(--amber-dim); color: var(--amber); }
+  .health-chip.amber .dot { background: var(--amber); }
+  .health-chip.red { background: var(--red-dim); color: var(--red); }
+  .health-chip.red .dot { background: var(--red); animation: pulse-dot 2s infinite; }
+
+  /* Tooltip */
+  .tooltip-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .tooltip-content {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1E293B;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 14px 16px;
+    min-width: 220px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 50;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1E293B;
+  }
+  .tooltip-wrap:hover .tooltip-content { display: block; }
+  .tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    color: var(--text-muted);
+  }
+  .tooltip-row .t-label { color: var(--text-dim); }
+  .tooltip-row .t-value { font-weight: 600; color: var(--text); }
+  .tooltip-row .t-value.green { color: var(--green-light); }
+  .tooltip-row .t-value.amber { color: var(--amber); }
+  .tooltip-row .t-value.red { color: var(--red); }
+  .tooltip-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 6px 0;
+  }
+
+  /* Action buttons */
+  .btn-action {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-reengage {
+    background: var(--red-dim);
+    color: var(--red);
+    border: 1px solid rgba(230,57,70,0.3);
+  }
+  .btn-reengage:hover { background: rgba(230,57,70,0.25); }
+  .btn-ontrack {
+    color: var(--green-light);
+    background: transparent;
+    cursor: default;
+    font-size: 12px;
+  }
+
+  /* ── Collapsible Formula Panel ── */
+  .collapsible {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .collapsible-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .collapsible-header:hover { background: rgba(255,255,255,0.02); }
+  .collapsible-header h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .collapsible-arrow {
+    color: var(--text-muted);
+    transition: transform 0.25s;
+    font-size: 12px;
+  }
+  .collapsible.open .collapsible-arrow { transform: rotate(180deg); }
+  .collapsible-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .collapsible.open .collapsible-body { max-height: 600px; }
+  .formula-content {
+    padding: 0 20px 20px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+  .formula-code {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .formula-code .hl-green { color: var(--green-light); }
+  .formula-code .hl-amber { color: var(--amber); }
+  .formula-code .hl-red { color: var(--red); }
+  .formula-code .hl-dim { color: var(--text-dim); }
+
+  /* ── Intervention Queue ── */
+  .intervention-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .intervention-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .intervention-header h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .flag-count {
+    background: var(--red);
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .intervention-list {
+    list-style: none;
+  }
+  .intervention-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .intervention-item:last-child { border-bottom: none; }
+  .intervention-left {
+    flex: 1;
+  }
+  .intervention-handle {
+    font-weight: 600;
+    font-size: 13px;
+    margin-right: 8px;
+  }
+  .intervention-reason {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .btn-expand-dm {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--navy-light);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-expand-dm:hover { background: #243650; color: var(--text); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 18, 32, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  }
+  .modal-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .modal-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+  }
+  .modal-dm {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .modal-dm .name-placeholder { color: var(--green-light); font-weight: 600; }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .btn-modal {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-copy {
+    background: var(--green);
+    color: var(--text);
+  }
+  .btn-copy:hover { background: var(--green-light); }
+  .btn-contacted {
+    background: var(--navy-light);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-contacted:hover { color: var(--text); background: #243650; }
+  .btn-close-modal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .btn-close-modal:hover { color: var(--text); }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .controls-bar { flex-direction: column; align-items: flex-start; }
+  }
+  @media (max-width: 768px) {
+    .header { padding: 16px; }
+    .container { padding: 16px 12px 48px; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .kpi-value { font-size: 26px; }
+    /* Card stack on mobile */
+    .table-panel { display: none; }
+    .mobile-cards { display: block; }
+  }
+  @media (min-width: 769px) {
+    .mobile-cards { display: none; }
+  }
+
+  /* Mobile card stack */
+  .mobile-cards {
+    display: none;
+  }
+  .mobile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .mobile-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .mobile-card-detail {
+    display: none;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .mobile-card-detail.open { display: block; }
+  .mobile-detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+  .mobile-expand {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .mobile-expand:hover { color: var(--text-muted); }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--green);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    z-index: 300;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <svg class="logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="10" fill="#0F1B2D"/>
+      <path d="M20 8 L20 20 M20 20 C20 20 14 26 12 30 M20 20 C20 20 26 26 28 30 M20 16 C16 14 13 16 14 19 M20 16 C24 14 27 16 26 19" stroke="#2D6A4F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="20" cy="8" r="2" fill="#40916C"/>
+    </svg>
+    <div class="header-text">
+      <h1>Ambassador Health Monitor</h1>
+      <p>30-Day Activation Tracker &mdash; Post-Signing Operations</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="live-clock"><span class="live-dot"></span><span id="clock"></span></span>
+    <button class="btn-export" onclick="exportCSV()" aria-label="Export table as CSV">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Export CSV
+    </button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <div class="filter-group" id="score-filters">
+      <button class="filter-btn active" onclick="setScoreFilter('all')" data-filter="all">All</button>
+      <button class="filter-btn" onclick="setScoreFilter('at-risk')" data-filter="at-risk">At Risk (&lt;50)</button>
+      <button class="filter-btn" onclick="setScoreFilter('ghost')" data-filter="ghost">Ghost Risk (&lt;30)</button>
+    </div>
+    <div class="week-tabs" id="week-tabs">
+      <button class="week-tab active" onclick="setWeekFilter('all')" data-week="all">All Weeks</button>
+      <button class="week-tab" onclick="setWeekFilter(1)" data-week="1">Week 1</button>
+      <button class="week-tab" onclick="setWeekFilter(2)" data-week="2">Week 2</button>
+      <button class="week-tab" onclick="setWeekFilter(3)" data-week="3">Week 3</button>
+      <button class="week-tab" onclick="setWeekFilter(4)" data-week="4">Week 4</button>
+    </div>
+  </div>
+
+  <!-- Ambassador Table -->
+  <div class="table-panel">
+    <div class="table-scroll">
+      <table class="amb-table">
+        <thead>
+          <tr>
+            <th onclick="sortTable('handle')">Ambassador <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable('days')">Days Since Signing <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable('draft')">Draft Submitted <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable('posts')">Posts Live <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable('sales')">Sales Driven <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable('lastDm')">Last DM Response <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable('score')">Health Score <span class="sort-arrow">&#9650;</span></th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mobile Cards -->
+  <div class="mobile-cards" id="mobile-cards"></div>
+
+  <!-- Health Score Formula (Collapsible) -->
+  <div class="collapsible" id="formula-panel">
+    <div class="collapsible-header" onclick="toggleFormula()" role="button" tabindex="0" aria-expanded="false">
+      <h3>Health Score Formula</h3>
+      <span class="collapsible-arrow">&#9660;</span>
+    </div>
+    <div class="collapsible-body">
+      <div class="formula-content">
+        <div class="formula-code"><span class="hl-dim">Health Score (0-100) =</span>
+
+  Draft Submitted      <span class="hl-green">+30</span> if Yes, <span class="hl-red">+0</span> if No
+  Posts On Schedule     <span class="hl-green">+25</span> if on track, <span class="hl-amber">+12</span> if 1 behind, <span class="hl-red">+0</span> if 2+ behind
+  DM Response Recency  <span class="hl-green">+20</span> if &lt;3 days, <span class="hl-amber">+10</span> if 3-7 days, <span class="hl-red">+0</span> if &gt;7 days
+  Sales Activity       <span class="hl-green">+15</span> if &gt;$200, <span class="hl-amber">+8</span> if $50-200, <span class="hl-red">+0</span> if &lt;$50
+  Days Active Bonus    <span class="hl-green">+10</span> if day &le;7 <span class="hl-dim">(grace period)</span>
+
+<span class="hl-dim">────────────────────────────────────────────────</span>
+  Score <span class="hl-amber">&lt;50</span> at Day 10  &rarr; auto-flag for re-engagement DM
+  Score <span class="hl-red">&lt;30</span> at any day  &rarr; GHOST RISK &mdash; escalate immediately</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intervention Queue -->
+  <div class="intervention-panel">
+    <div class="intervention-header">
+      <h3>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Intervention Queue
+        <span class="flag-count" id="flag-count">0</span>
+      </h3>
+    </div>
+    <ul class="intervention-list" id="intervention-list"></ul>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true">
+    <h3 class="modal-title" id="modal-title">Re-engagement DM</h3>
+    <p class="modal-sub" id="modal-sub">Copy and send via Instagram DM</p>
+    <div class="modal-dm" id="modal-dm"></div>
+    <div class="modal-actions">
+      <button class="btn-modal btn-copy" onclick="copyDM()" id="btn-copy">Copy to Clipboard</button>
+      <button class="btn-modal btn-contacted" onclick="markContacted()" id="btn-contacted">Mark as Contacted</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Data ──
+const ambassadors = [
+  { handle: "@laurenlifts", days: 5, draft: true, postsLive: 1, postsAgreed: 2, sales: 180, lastDmDays: 1, week: 1 },     // 30+12+20+8+10 = 80
+  { handle: "@nutriwithnat", days: 12, draft: true, postsLive: 2, postsAgreed: 2, sales: 420, lastDmDays: 0, week: 2 },    // 30+25+20+15+0 = 90
+  { handle: "@coachcallie", days: 18, draft: true, postsLive: 1, postsAgreed: 3, sales: 95, lastDmDays: 4, week: 3 },      // 30+0+10+8+0  = 48
+  { handle: "@wellnessbyjo", days: 11, draft: false, postsLive: 0, postsAgreed: 2, sales: 55, lastDmDays: 5, week: 2 },    // 0+0+10+8+0   = 18
+  { handle: "@fitwithrosa", days: 14, draft: true, postsLive: 0, postsAgreed: 2, sales: 40, lastDmDays: 5, week: 2 },      // 30+0+10+0+0  = 40
+  { handle: "@drmindset", days: 7, draft: false, postsLive: 0, postsAgreed: 1, sales: 0, lastDmDays: 2, week: 1 },         // 0+12+20+0+10 = 42
+  { handle: "@simplyhealthy", days: 22, draft: true, postsLive: 3, postsAgreed: 3, sales: 710, lastDmDays: 1, week: 4 },   // 30+25+20+15+0 = 90
+  { handle: "@therawlife", days: 9, draft: true, postsLive: 1, postsAgreed: 2, sales: 140, lastDmDays: 3, week: 2 },       // 30+12+10+8+0 = 60
+];
+
+// ── Health Score Calculator ──
+function calcScore(a) {
+  let s = 0;
+  // Draft: +30 if yes
+  const draftPts = a.draft ? 30 : 0;
+  // Posts: +25 on track, +12 if 1 behind, +0 if 2+ behind
+  const postsBehind = a.postsAgreed - a.postsLive;
+  const postsPts = postsBehind <= 0 ? 25 : (postsBehind === 1 ? 12 : 0);
+  // DM recency: +20 if <3, +10 if 3-7, +0 if >7
+  const dmPts = a.lastDmDays < 3 ? 20 : (a.lastDmDays <= 7 ? 10 : 0);
+  // Sales: +15 if >200, +8 if 50-200, +0 if <50
+  const salesPts = a.sales > 200 ? 15 : (a.sales >= 50 ? 8 : 0);
+  // Grace period: +10 if day <=7
+  const gracePts = a.days <= 7 ? 10 : 0;
+
+  s = draftPts + postsPts + dmPts + salesPts + gracePts;
+  return { total: s, breakdown: { draftPts, postsPts, dmPts, salesPts, gracePts } };
+}
+
+// Pre-compute scores
+ambassadors.forEach(a => {
+  const sc = calcScore(a);
+  a.score = sc.total;
+  a.breakdown = sc.breakdown;
+});
+
+// ── State ──
+let scoreFilter = 'all';
+let weekFilter = 'all';
+let sortKey = 'score';
+let sortDir = -1; // -1 = desc
+let currentModalHandle = null;
+
+// ── Color helpers ──
+function scoreColor(s) { return s >= 60 ? 'green' : s >= 30 ? 'amber' : 'red'; }
+function daysColor(d) { return d <= 7 ? 'green' : d <= 14 ? 'amber' : 'red'; }
+function dmColor(d) { return d < 3 ? 'green' : d <= 7 ? 'amber' : 'red'; }
+function avatarBg(handle) {
+  const colors = ['#2D6A4F','#1A6B8A','#7C3AED','#BE185D','#B45309','#0F766E','#4338CA','#9333EA'];
+  let hash = 0;
+  for (let i = 0; i < handle.length; i++) hash = handle.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+function initials(handle) {
+  return handle.replace('@','').substring(0,2).toUpperCase();
+}
+
+// ── DM Templates ──
+const dmTemplates = {
+  noDraft: (name) => `Hey ${name} — just checking in. Wanted to make sure you got the product okay and see if you have any questions before filming. We're here if you need anything.`,
+  noPosts: (name) => `Hey ${name} — our records show we haven't seen your first post yet. Is there anything holding you up? Happy to push the timeline slightly if needed.`,
+  noResponse: (name) => `Hey ${name} — haven't heard back in a bit. Just want to make sure everything's good on your end. Let me know.`,
+};
+
+function getDmType(a) {
+  if (!a.draft) return { type: 'noDraft', reason: `No draft submitted, day ${a.days}` };
+  if (a.postsLive === 0 && a.days > 7) return { type: 'noPosts', reason: `No posts live, day ${a.days}` };
+  if (a.lastDmDays > 7) return { type: 'noResponse', reason: `No DM response in ${a.lastDmDays} days` };
+  if (a.postsAgreed - a.postsLive >= 2) return { type: 'noPosts', reason: `${a.postsAgreed - a.postsLive} posts behind schedule` };
+  return { type: 'noResponse', reason: `Low engagement — score ${a.score}` };
+}
+
+// ── Render KPI Cards ──
+function renderKPIs() {
+  const visible = getFilteredData();
+  const all = ambassadors;
+  const active = all.filter(a => a.score >= 50).length;
+  const atRisk = all.filter(a => a.score >= 30 && a.score < 50).length;
+  const ghost = all.filter(a => a.score < 30).length;
+  const avgScore = Math.round(all.reduce((s, a) => s + a.score, 0) / all.length);
+  const avgColor = scoreColor(avgScore);
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card green">
+      <div class="kpi-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div class="kpi-label">Active Ambassadors</div>
+      <div class="kpi-value green">${active}</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-icon amber">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="kpi-label">At Risk</div>
+      <div class="kpi-value amber">${atRisk}</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <div class="kpi-label">Ghost Risk</div>
+      <div class="kpi-value red">${ghost}</div>
+    </div>
+    <div class="kpi-card ${avgColor}">
+      <div class="kpi-icon ${avgColor}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <div class="kpi-label">Avg Health Score</div>
+      <div class="kpi-value ${avgColor}">${avgScore}</div>
+    </div>
+  `;
+}
+
+// ── Filter & Sort ──
+function getFilteredData() {
+  let data = [...ambassadors];
+  if (scoreFilter === 'at-risk') data = data.filter(a => a.score < 50);
+  if (scoreFilter === 'ghost') data = data.filter(a => a.score < 30);
+  if (weekFilter !== 'all') data = data.filter(a => a.week === weekFilter);
+
+  data.sort((a, b) => {
+    let va, vb;
+    switch (sortKey) {
+      case 'handle': va = a.handle; vb = b.handle; return sortDir * va.localeCompare(vb);
+      case 'days': va = a.days; vb = b.days; break;
+      case 'draft': va = a.draft ? 1 : 0; vb = b.draft ? 1 : 0; break;
+      case 'posts': va = a.postsLive; vb = b.postsLive; break;
+      case 'sales': va = a.sales; vb = b.sales; break;
+      case 'lastDm': va = a.lastDmDays; vb = b.lastDmDays; break;
+      case 'score': va = a.score; vb = b.score; break;
+      default: va = a.score; vb = b.score;
+    }
+    return sortDir * (va - vb);
+  });
+  return data;
+}
+
+// ── Render Table ──
+function renderTable() {
+  const data = getFilteredData();
+  const tbody = document.getElementById('table-body');
+
+  tbody.innerHTML = data.map(a => {
+    const sc = scoreColor(a.score);
+    const dc = daysColor(a.days);
+    const dmc = dmColor(a.lastDmDays);
+    const postsBehind = a.postsAgreed - a.postsLive;
+    const postsColor = postsBehind >= 2 ? 'red' : postsBehind === 1 ? 'amber' : 'green';
+    const salesColor = (a.sales < 100 && a.days >= 14) ? 'red' : (a.sales >= 200 ? 'green' : 'amber');
+    const b = a.breakdown;
+
+    return `<tr>
+      <td>
+        <div class="amb-cell">
+          <div class="avatar" style="background:${avatarBg(a.handle)}">${initials(a.handle)}</div>
+          <span class="amb-handle">${a.handle}</span>
+        </div>
+      </td>
+      <td><span class="chip chip-${dc}">${a.days} days</span></td>
+      <td>${a.draft ? '<span class="badge-yes">Yes</span>' : '<span class="badge-no">No</span>'}</td>
+      <td style="color:var(--${postsColor === 'green' ? 'green-light' : postsColor}); font-weight:600">${a.postsLive} / ${a.postsAgreed}</td>
+      <td style="color:var(--${salesColor === 'green' ? 'green-light' : salesColor}); font-weight:600">$${a.sales.toLocaleString()}</td>
+      <td><span class="chip chip-${dmc}">${a.lastDmDays === 0 ? 'Today' : a.lastDmDays + ' day' + (a.lastDmDays > 1 ? 's' : '') + ' ago'}</span></td>
+      <td>
+        <div class="tooltip-wrap">
+          <span class="health-chip ${sc}"><span class="dot"></span>${a.score}</span>
+          <div class="tooltip-content">
+            <div class="tooltip-row"><span class="t-label">Draft</span><span class="t-value ${b.draftPts > 0 ? 'green' : 'red'}">+${b.draftPts}</span></div>
+            <div class="tooltip-row"><span class="t-label">Posts</span><span class="t-value ${b.postsPts >= 25 ? 'green' : b.postsPts > 0 ? 'amber' : 'red'}">+${b.postsPts}</span></div>
+            <div class="tooltip-row"><span class="t-label">DM Response</span><span class="t-value ${b.dmPts >= 20 ? 'green' : b.dmPts > 0 ? 'amber' : 'red'}">+${b.dmPts}</span></div>
+            <div class="tooltip-row"><span class="t-label">Sales</span><span class="t-value ${b.salesPts >= 15 ? 'green' : b.salesPts > 0 ? 'amber' : 'red'}">+${b.salesPts}</span></div>
+            <div class="tooltip-row"><span class="t-label">Grace Period</span><span class="t-value ${b.gracePts > 0 ? 'green' : 'red'}">+${b.gracePts}</span></div>
+            <div class="tooltip-divider"></div>
+            <div class="tooltip-row"><span class="t-label">Total</span><span class="t-value" style="font-size:14px">${a.score}</span></div>
+          </div>
+        </div>
+      </td>
+      <td>
+        ${a.score < 50
+          ? `<button class="btn-action btn-reengage" onclick="openModal('${a.handle}')" aria-label="Send re-engagement DM to ${a.handle}">Send DM</button>`
+          : '<span class="btn-action btn-ontrack">On Track</span>'
+        }
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Update sort column visual
+  document.querySelectorAll('.amb-table th').forEach(th => th.classList.remove('sorted'));
+}
+
+// ── Render Mobile Cards ──
+function renderMobileCards() {
+  const data = getFilteredData();
+  document.getElementById('mobile-cards').innerHTML = data.map((a, i) => {
+    const sc = scoreColor(a.score);
+    return `<div class="mobile-card">
+      <div class="mobile-card-header">
+        <div class="amb-cell">
+          <div class="avatar" style="background:${avatarBg(a.handle)}">${initials(a.handle)}</div>
+          <div>
+            <div class="amb-handle">${a.handle}</div>
+            <div style="font-size:11px;color:var(--text-dim)">${a.days} days</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="health-chip ${sc}"><span class="dot"></span>${a.score}</span>
+          <button class="mobile-expand" onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('open')">Details</button>
+        </div>
+      </div>
+      <div class="mobile-card-detail">
+        <div class="mobile-detail-row"><span>Draft</span><span>${a.draft ? 'Yes' : 'No'}</span></div>
+        <div class="mobile-detail-row"><span>Posts</span><span>${a.postsLive}/${a.postsAgreed}</span></div>
+        <div class="mobile-detail-row"><span>Sales</span><span>$${a.sales}</span></div>
+        <div class="mobile-detail-row"><span>Last DM</span><span>${a.lastDmDays === 0 ? 'Today' : a.lastDmDays + 'd ago'}</span></div>
+        ${a.score < 50 ? `<button class="btn-action btn-reengage" style="margin-top:10px;width:100%;padding:10px" onclick="openModal('${a.handle}')">Send Re-engagement DM</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Render Intervention Queue ──
+function renderInterventions() {
+  const flagged = ambassadors.filter(a => a.score < 50).sort((a, b) => a.score - b.score);
+  document.getElementById('flag-count').textContent = flagged.length;
+
+  document.getElementById('intervention-list').innerHTML = flagged.map(a => {
+    const dm = getDmType(a);
+    const sc = scoreColor(a.score);
+    return `<li class="intervention-item">
+      <div class="intervention-left">
+        <span class="intervention-handle">${a.handle}</span>
+        <span class="health-chip ${sc}" style="font-size:11px;padding:3px 8px"><span class="dot" style="width:6px;height:6px"></span>${a.score}</span>
+        <div class="intervention-reason">${dm.reason}</div>
+      </div>
+      <button class="btn-expand-dm" onclick="openModal('${a.handle}')" aria-label="View suggested DM for ${a.handle}">View Suggested DM</button>
+    </li>`;
+  }).join('');
+}
+
+// ── Event Handlers ──
+function setScoreFilter(f) {
+  scoreFilter = f;
+  document.querySelectorAll('#score-filters .filter-btn').forEach(btn => {
+    const bf = btn.dataset.filter;
+    btn.className = 'filter-btn' + (bf === f ? (f === 'at-risk' ? ' active-amber' : f === 'ghost' ? ' active-red' : ' active') : '');
+  });
+  renderTable();
+  renderMobileCards();
+}
+
+function setWeekFilter(w) {
+  weekFilter = w;
+  document.querySelectorAll('#week-tabs .week-tab').forEach(btn => {
+    const bw = btn.dataset.week;
+    btn.classList.toggle('active', bw === String(w));
+  });
+  renderTable();
+  renderMobileCards();
+}
+
+function sortTable(key) {
+  if (sortKey === key) {
+    sortDir *= -1;
+  } else {
+    sortKey = key;
+    sortDir = key === 'handle' ? 1 : -1;
+  }
+  renderTable();
+}
+
+function toggleFormula() {
+  const panel = document.getElementById('formula-panel');
+  panel.classList.toggle('open');
+  panel.querySelector('.collapsible-header').setAttribute('aria-expanded', panel.classList.contains('open'));
+}
+
+function openModal(handle) {
+  currentModalHandle = handle;
+  const a = ambassadors.find(x => x.handle === handle);
+  if (!a) return;
+  const dm = getDmType(a);
+  const firstName = handle.replace('@','').replace(/[_.\d]/g,'');
+  const capFirst = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+  const msg = dmTemplates[dm.type](capFirst);
+
+  document.getElementById('modal-title').textContent = `Re-engagement DM — ${handle}`;
+  document.getElementById('modal-sub').textContent = dm.reason;
+  document.getElementById('modal-dm').innerHTML = msg;
+  document.getElementById('btn-copy').textContent = 'Copy to Clipboard';
+  document.getElementById('modal-overlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === e.currentTarget) {
+    document.getElementById('modal-overlay').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+}
+
+function copyDM() {
+  const text = document.getElementById('modal-dm').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('btn-copy').textContent = 'Copied!';
+    showToast('DM copied to clipboard');
+    setTimeout(() => { document.getElementById('btn-copy').textContent = 'Copy to Clipboard'; }, 2000);
+  });
+}
+
+function markContacted() {
+  if (!currentModalHandle) return;
+  const a = ambassadors.find(x => x.handle === currentModalHandle);
+  if (a) {
+    a.lastDmDays = 0;
+    const sc = calcScore(a);
+    a.score = sc.total;
+    a.breakdown = sc.breakdown;
+  }
+  document.getElementById('modal-overlay').classList.remove('show');
+  document.body.style.overflow = '';
+  showToast(`${currentModalHandle} marked as contacted`);
+  renderAll();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function exportCSV() {
+  const headers = ['Handle','Days Since Signing','Draft Submitted','Posts Live','Posts Agreed','Sales Driven','Last DM (days)','Health Score','Week'];
+  const rows = ambassadors.map(a => [
+    a.handle, a.days, a.draft ? 'Yes' : 'No', a.postsLive, a.postsAgreed, a.sales, a.lastDmDays, a.score, a.week
+  ]);
+  let csv = headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'ambassador_health_' + new Date().toISOString().slice(0,10) + '.csv';
+  link.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported');
+}
+
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleDateString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric'
+  }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+// ── Keyboard ──
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('modal-overlay').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+});
+
+// ── Init ──
+function renderAll() {
+  renderKPIs();
+  renderTable();
+  renderMobileCards();
+  renderInterventions();
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+renderAll();
+</script>
+
+</body>
+</html>
