@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Root Labs — Ghost Recovery Campaign</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F1B2D;
+    --navy-light: #1A2B42;
+    --green: #2D6A4F;
+    --green-light: #40916C;
+    --amber: #F4A261;
+    --amber-bg: rgba(244, 162, 97, 0.12);
+    --red: #E63946;
+    --red-bg: rgba(230, 57, 70, 0.12);
+    --green-bg: rgba(45, 106, 79, 0.12);
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F0F2F5;
+    --gray-200: #D9DCE1;
+    --gray-300: #A0A8B4;
+    --gray-400: #6B7280;
+    --gray-500: #4B5563;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--gray-100);
+    color: var(--navy);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: var(--navy);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .header p {
+    font-size: 13px;
+    color: var(--gray-300);
+    margin-top: 4px;
+  }
+  .header-stats {
+    display: flex;
+    gap: 24px;
+  }
+  .header-stat {
+    text-align: center;
+  }
+  .header-stat .num {
+    font-family: 'Sora', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--amber);
+  }
+  .header-stat .label {
+    font-size: 11px;
+    color: var(--gray-300);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  /* Strategy Box */
+  .strategy-box {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .strategy-box h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .strategy-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .strategy-card {
+    background: var(--gray-50);
+    border-radius: 10px;
+    padding: 18px;
+    border: 1px solid var(--gray-200);
+  }
+  .strategy-card .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+  }
+  .strategy-card .card-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .strategy-card .card-sub {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 4px;
+  }
+
+  /* Sequence Timeline */
+  .sequence-panel {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .sequence-panel h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--gray-200);
+  }
+  .timeline-step {
+    position: relative;
+    margin-bottom: 28px;
+  }
+  .timeline-step:last-child { margin-bottom: 0; }
+  .timeline-dot {
+    position: absolute;
+    left: -32px;
+    top: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .dot-green { background: var(--green); }
+  .dot-amber { background: var(--amber); }
+  .dot-red { background: var(--red); }
+  .dot-navy { background: var(--navy); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .step-title {
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .step-timing {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-400);
+    background: var(--gray-100);
+    padding: 3px 10px;
+    border-radius: 10px;
+  }
+  .step-goal {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .message-box {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--gray-500);
+    position: relative;
+  }
+  .message-box::before {
+    content: 'DM';
+    position: absolute;
+    top: -8px;
+    left: 14px;
+    background: var(--white);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gray-300);
+    padding: 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .message-box .placeholder {
+    color: var(--green);
+    font-weight: 600;
+  }
+  .message-box .word-count {
+    display: block;
+    text-align: right;
+    font-size: 10px;
+    color: var(--gray-300);
+    margin-top: 8px;
+  }
+
+  .step-note {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 8px;
+    padding-left: 4px;
+  }
+
+  /* Expected Outcomes */
+  .outcomes-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .outcome-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 22px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    text-align: center;
+  }
+  .outcome-card .o-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .outcome-card .o-label {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 500;
+  }
+  .o-green { color: var(--green); }
+  .o-amber { color: #C77A2E; }
+  .o-navy { color: var(--navy); }
+
+  /* Tracker Table */
+  .tracker-panel {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .tracker-panel h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .tracker-sub {
+    font-size: 13px;
+    color: var(--gray-400);
+    margin-bottom: 20px;
+  }
+  .tracker-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .tracker-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 0 10px 12px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .tracker-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+  }
+  .tracker-table tr:last-child td { border-bottom: none; }
+  .tracker-table tr:hover { background: var(--gray-50); }
+
+  .priority-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .priority-high { background: var(--green-bg); color: var(--green); }
+  .priority-med { background: var(--amber-bg); color: #C77A2E; }
+  .priority-low { background: var(--red-bg); color: var(--red); }
+
+  .action-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+    cursor: pointer;
+  }
+  .action-tag:hover { text-decoration: underline; }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .filter-btn {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .filter-btn.active {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 27, 45, 0.6);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 28px;
+    width: 90%;
+    max-width: 520px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .modal .modal-sub {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-bottom: 16px;
+  }
+  .modal .message-box { margin-bottom: 12px; }
+  .modal-close {
+    display: block;
+    margin: 16px auto 0;
+    padding: 10px 28px;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .modal-close:hover { background: var(--navy-light); }
+
+  @media (max-width: 900px) {
+    .strategy-grid { grid-template-columns: 1fr; }
+    .outcomes-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .header { padding: 20px; }
+    .header-stats { gap: 16px; }
+    .container { padding: 20px 16px 48px; }
+    .outcomes-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Ghost Recovery Campaign</h1>
+    <p>Root Labs &mdash; Re-activate the 56 ambassadors who have product but never posted</p>
+  </div>
+  <div class="header-stats">
+    <div class="header-stat">
+      <div class="num">56</div>
+      <div class="label">Ghosts</div>
+    </div>
+    <div class="header-stat">
+      <div class="num">$0</div>
+      <div class="label">Extra Cost</div>
+    </div>
+    <div class="header-stat">
+      <div class="num">14 days</div>
+      <div class="label">Campaign Length</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Strategy Overview -->
+  <div class="strategy-box">
+    <h2>Why This Exists</h2>
+    <p style="font-size:14px; color:var(--gray-500); line-height:1.6; margin-bottom:18px;">
+      56 ambassadors already have Root Labs product in their hands. The acquisition cost is sunk. The product cost is sunk. Every one of them who posts is pure ROI at zero marginal cost. Even recovering <strong>5 of 56 (9%)</strong> would more than double the program's lifetime output. This campaign runs in 14 days with 4 touchpoints and costs nothing except time.
+    </p>
+    <div class="strategy-grid">
+      <div class="strategy-card">
+        <div class="card-label">Conservative Recovery</div>
+        <div class="card-value" style="color:var(--green)">5 posts</div>
+        <div class="card-sub">9% of 56 — doubles total program output</div>
+      </div>
+      <div class="strategy-card">
+        <div class="card-label">Moderate Recovery</div>
+        <div class="card-value" style="color:var(--amber)">8 posts</div>
+        <div class="card-sub">14% of 56 — triples program output</div>
+      </div>
+      <div class="strategy-card">
+        <div class="card-label">Marginal Cost</div>
+        <div class="card-value">$0</div>
+        <div class="card-sub">Product already shipped — only cost is sending DMs</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4-Message Recovery Sequence -->
+  <div class="sequence-panel">
+    <h2>The 4-Message Recovery Sequence</h2>
+
+    <div class="timeline">
+
+      <!-- Message 1 -->
+      <div class="timeline-step">
+        <div class="timeline-dot dot-green">1</div>
+        <div class="step-header">
+          <span class="step-title">The Check-In</span>
+          <span class="step-timing">Day 1</span>
+        </div>
+        <div class="step-goal">Goal: Re-open the conversation without pressure. Gauge if they even tried the product.</div>
+        <div class="message-box">
+          Hey <span class="placeholder">[name]</span> — been a few weeks since we sent the gummies over. Curious if you've had a chance to try them? No pitch, genuinely want to know if they worked for you. A lot of people notice the energy shift around day 5-7.
+          <span class="word-count">43 words</span>
+        </div>
+        <div class="step-note">Why it works: Asks a question they can answer without committing to anything. "No pitch" disarms the guilt of not having posted.</div>
+      </div>
+
+      <!-- Message 2 -->
+      <div class="timeline-step">
+        <div class="timeline-dot dot-amber">2</div>
+        <div class="step-header">
+          <span class="step-title">The Content Shortcut</span>
+          <span class="step-timing">Day 4 &mdash; if they replied</span>
+        </div>
+        <div class="step-goal">Goal: Remove the "I don't know what to post" friction. Give them a content idea they can shoot in 5 minutes.</div>
+        <div class="message-box">
+          Glad you liked them! Quick idea if you ever want to share it — a 15-second morning routine clip. Just the gummies next to your coffee or pre-workout. No script needed. Some of our creators just film their actual morning and it outperforms the polished stuff.
+          <span class="word-count">45 words</span>
+        </div>
+        <div class="step-note">Why it works: "If you ever want to" keeps it low pressure. The content idea is so simple it removes creative paralysis.</div>
+      </div>
+
+      <!-- Message 3 -->
+      <div class="timeline-step">
+        <div class="timeline-dot dot-amber">3</div>
+        <div class="step-header">
+          <span class="step-title">The Social Proof Nudge</span>
+          <span class="step-timing">Day 8 &mdash; if no post yet</span>
+        </div>
+        <div class="step-goal">Goal: Show them others are posting and earning. Create gentle FOMO without guilt.</div>
+        <div class="message-box">
+          Thought you'd want to see this — <span class="placeholder">[creator name]</span> posted a quick Story review last week and drove $380 in sales from it. She earned $57 in commission from one Story. If you're open to it, I can send over her exact format. Takes about 3 minutes.
+          <span class="word-count">48 words</span>
+        </div>
+        <div class="step-note">Why it works: Real dollar amounts make commission tangible. Offering a template reduces effort to near-zero.</div>
+      </div>
+
+      <!-- Message 4 -->
+      <div class="timeline-step">
+        <div class="timeline-dot dot-navy">4</div>
+        <div class="step-header">
+          <span class="step-title">The Graceful Close</span>
+          <span class="step-timing">Day 14 &mdash; final message</span>
+        </div>
+        <div class="step-goal">Goal: Close the loop cleanly. No bridge burned. If they're not going to post, free up the slot.</div>
+        <div class="message-box">
+          Hey <span class="placeholder">[name]</span> — totally understand if the timing isn't right. I'll close out your ambassador slot for now so there's no hanging obligation. If you want to jump back in later, just DM me. The product is yours to keep regardless. Thanks for giving it a try.
+          <span class="word-count">48 words</span>
+        </div>
+        <div class="step-note">Why it works: "Close out your slot" creates scarcity. "Yours to keep regardless" maintains goodwill. Some people re-engage only when they feel the door closing.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Expected Outcomes -->
+  <div class="outcomes-grid">
+    <div class="outcome-card">
+      <div class="o-value o-navy">56</div>
+      <div class="o-label">DMs Sent (Day 1)</div>
+    </div>
+    <div class="outcome-card">
+      <div class="o-value o-amber">~20</div>
+      <div class="o-label">Expected Replies (35%)</div>
+    </div>
+    <div class="outcome-card">
+      <div class="o-value o-green">5-8</div>
+      <div class="o-label">Recovered Posts</div>
+    </div>
+    <div class="outcome-card">
+      <div class="o-value o-green">$0</div>
+      <div class="o-label">Additional Spend</div>
+    </div>
+  </div>
+
+  <!-- Priority Tracker -->
+  <div class="tracker-panel">
+    <h2>Ghost Recovery Tracker</h2>
+    <p class="tracker-sub">Prioritized by likelihood of recovery. High = engaged before ghosting. Low = never responded to onboarding.</p>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterGhosts('all')">All (56)</button>
+      <button class="filter-btn" onclick="filterGhosts('high')">High Priority (18)</button>
+      <button class="filter-btn" onclick="filterGhosts('med')">Medium (22)</button>
+      <button class="filter-btn" onclick="filterGhosts('low')">Low (16)</button>
+    </div>
+
+    <table class="tracker-table">
+      <thead>
+        <tr>
+          <th>Ambassador</th>
+          <th>Niche</th>
+          <th>Days Since Product</th>
+          <th>Last Contact</th>
+          <th>Priority</th>
+          <th>Sequence Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="ghost-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Message Preview Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modal-title">Recovery Message</h3>
+    <p class="modal-sub" id="modal-sub"></p>
+    <div id="modal-messages"></div>
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('show')">Close</button>
+  </div>
+</div>
+
+<script>
+// Sample ghost data — in production this would pull from a spreadsheet
+const ghosts = [
+  { name: "Sarah Chen", handle: "@sarahwellness", niche: "Yoga / mindfulness", days: 34, lastContact: "Onboarding DM", priority: "high", step: 0 },
+  { name: "Marcus Johnson", handle: "@marcusfits", niche: "Gym / fitness", days: 28, lastContact: "Welcome email", priority: "high", step: 0 },
+  { name: "Lily Tran", handle: "@lilynourish", niche: "Clean eating", days: 41, lastContact: "Onboarding call", priority: "high", step: 0 },
+  { name: "Derek Owens", handle: "@derekdaily", niche: "Lifestyle", days: 22, lastContact: "Welcome email", priority: "high", step: 0 },
+  { name: "Nadia Patel", handle: "@nadiaglow", niche: "Skincare / Ayurveda", days: 38, lastContact: "Onboarding DM", priority: "high", step: 0 },
+  { name: "Jordan Lee", handle: "@jordanmoves", niche: "Functional fitness", days: 19, lastContact: "Onboarding call", priority: "high", step: 0 },
+  { name: "Ava Martinez", handle: "@avagreens", niche: "Plant-based nutrition", days: 45, lastContact: "Onboarding DM", priority: "med", step: 0 },
+  { name: "Chris Taylor", handle: "@christwellness", niche: "Men's health", days: 30, lastContact: "Product shipped", priority: "med", step: 0 },
+  { name: "Priya Sharma", handle: "@priyabalance", niche: "Holistic health", days: 25, lastContact: "Welcome email", priority: "med", step: 0 },
+  { name: "Mike DeSantos", handle: "@mikelifts", niche: "Bodybuilding", days: 36, lastContact: "Product shipped", priority: "med", step: 0 },
+  { name: "Emma Ruiz", handle: "@emmaruizfit", niche: "Pilates / wellness", days: 33, lastContact: "Product shipped", priority: "med", step: 0 },
+  { name: "Tyler Brooks", handle: "@tylerbrooks_", niche: "Biohacking", days: 42, lastContact: "Onboarding DM", priority: "low", step: 0 },
+  { name: "Kayla Nguyen", handle: "@kaylasips", niche: "Coffee / lifestyle", days: 50, lastContact: "Product shipped", priority: "low", step: 0 },
+  { name: "Raj Mehta", handle: "@rajfueled", niche: "Running", days: 55, lastContact: "Product shipped", priority: "low", step: 0 },
+];
+
+const messages = [
+  {
+    title: "Message 1: The Check-In",
+    template: (name) => `Hey ${name} — been a few weeks since we sent the gummies over. Curious if you've had a chance to try them? No pitch, genuinely want to know if they worked for you. A lot of people notice the energy shift around day 5-7.`
+  },
+  {
+    title: "Message 2: The Content Shortcut",
+    template: (name) => `Glad you liked them! Quick idea if you ever want to share it — a 15-second morning routine clip. Just the gummies next to your coffee or pre-workout. No script needed. Some of our creators just film their actual morning and it outperforms the polished stuff.`
+  },
+  {
+    title: "Message 3: The Social Proof Nudge",
+    template: (name) => `Thought you'd want to see this — one of our creators posted a quick Story review last week and drove $380 in sales from it. She earned $57 in commission from one Story. If you're open to it, I can send over her exact format. Takes about 3 minutes.`
+  },
+  {
+    title: "Message 4: The Graceful Close",
+    template: (name) => `Hey ${name} — totally understand if the timing isn't right. I'll close out your ambassador slot for now so there's no hanging obligation. If you want to jump back in later, just DM me. The product is yours to keep regardless. Thanks for giving it a try.`
+  }
+];
+
+let currentFilter = 'all';
+
+function renderTable() {
+  const tbody = document.getElementById('ghost-tbody');
+  const filtered = currentFilter === 'all' ? ghosts : ghosts.filter(g => g.priority === currentFilter);
+
+  tbody.innerHTML = filtered.map((g, i) => {
+    const priorityClass = g.priority === 'high' ? 'priority-high' : g.priority === 'med' ? 'priority-med' : 'priority-low';
+    const priorityLabel = g.priority === 'high' ? 'HIGH' : g.priority === 'med' ? 'MEDIUM' : 'LOW';
+    const stepLabel = g.step === 0 ? 'Not started' : `Step ${g.step}/4`;
+
+    return `<tr>
+      <td><strong>${g.name}</strong><br><span style="font-size:11px;color:var(--gray-300)">${g.handle}</span></td>
+      <td>${g.niche}</td>
+      <td>${g.days} days</td>
+      <td style="font-size:12px;color:var(--gray-400)">${g.lastContact}</td>
+      <td><span class="priority-badge ${priorityClass}">${priorityLabel}</span></td>
+      <td style="font-size:12px">${stepLabel}</td>
+      <td><span class="action-tag" onclick="showMessages('${g.name}')">View Messages</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterGhosts(priority) {
+  currentFilter = priority;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase().includes(priority === 'all' ? 'all' : priority));
+  });
+  renderTable();
+}
+
+function showMessages(name) {
+  const firstName = name.split(' ')[0];
+  document.getElementById('modal-title').textContent = `Recovery Sequence for ${name}`;
+  document.getElementById('modal-sub').textContent = 'Send these messages on the schedule below. Personalize the placeholders.';
+
+  const html = messages.map((m, i) => `
+    <div class="message-box" style="margin-bottom:14px">
+      <strong style="display:block;margin-bottom:6px;color:var(--navy);font-size:12px">${m.title}</strong>
+      ${m.template(firstName)}
+    </div>
+  `).join('');
+
+  document.getElementById('modal-messages').innerHTML = html;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e.target === e.currentTarget) {
+    e.target.classList.remove('show');
+  }
+}
+
+renderTable();
+</script>
+
+</body>
+</html>
